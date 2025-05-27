@@ -3,7 +3,6 @@ import db from '../services/db';
 
 export const setupSocket = (io: Server) => {
   io.on('connection', (socket) => {
-    console.log('Cliente conectado');
 
     socket.on('newTask', () => {
       const tasks = db.prepare('SELECT * FROM tasks').all();
@@ -11,7 +10,6 @@ export const setupSocket = (io: Server) => {
     });
 
     socket.on('disconnect', () => {
-      console.log('Cliente desconectado');
     });
   });
 };

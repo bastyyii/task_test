@@ -8,9 +8,10 @@
 </head>
 <body>
   <h1>Lista de Tareas</h1>
-  <form id="taskForm">
-    <input type="text" id="titulo" placeholder="Título" maxlength="100" required />
-    <input type="text" id="descripcion" placeholder="Descripción" maxlength="500" />
+  <form id="taskForm" novalidate>
+    <div id="errors" style="color: red;"></div>
+    <input type="text" id="title" placeholder="Título" required />
+    <input type="text" id="description" placeholder="Descripción" />
     <button type="submit">Agregar</button>
   </form>
 
