@@ -56,7 +56,8 @@ export const updateTaskStatus = (req: Request, res: Response) => {
     const { id } = req.params;
     const { status } = req.body;
     if (status !== 'pending' && status !== 'completed') {
-      return res.status(400).json({ error: 'Invalid status. Must be "pending" or "compled".' });
+      res.status(400).json({ error: 'Invalid status. Must be "pending" or "compled".' });
+      return
     }
 
     const result = db.prepare(`
@@ -66,7 +67,8 @@ export const updateTaskStatus = (req: Request, res: Response) => {
     `).run(status, id);
 
     if (result.changes === 0) {
-      return res.status(404).json({ error: 'Task not found' });
+      res.status(404).json({ error: 'Task not found' });
+      return
     }
 
     const updatedTask = db
@@ -96,7 +98,8 @@ export const deleteTask = (req: Request, res: Response) => {
     const result = db.prepare('DELETE FROM tasks WHERE id = ?').run(id);
 
     if (result.changes === 0) {
-      return res.status(404).json({ error: 'Task not found' });
+      res.status(404).json({ error: 'Task not found' });
+      return
     }
 
     res.status(204).send();
