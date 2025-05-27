@@ -4,6 +4,18 @@ Proyecto simple de lista de tareas pendientes en tiempo real usando Node.js, Exp
 
 Tecnologías utilizadas: Node.js, Express, TypeScript, SQLite, Socket.IO, HTML y JavaScript (frontend básico).
 
+## Descripción del diseño
+-Opté por la estructura MVC porque, aunque el proyecto es pequeño, esta organización facilita la 
+    escalabilidad, mantenibilidad y separación de responsabilidades. Si el proyecto creciera en complejidad, esta base permitiría integraciones más avanzadas sin necesidad de una reestructuración profunda.
+-Además, la validación de datos como el title y el id se realiza mediante middlewares personalizados. Esta decisión 
+    se tomó para centralizar la lógica de validación, mejorar la reutilización del código y facilitar la extensión futura (por ejemplo, agregar validaciones para otros campos, autenticación, etc.).
+
+-También se eligió usar TypeScript en lugar de JavaScript por varias razones:
+    Tipado estático: ayuda a detectar errores en tiempo de desarrollo, mejorando la fiabilidad del código.
+    Mejor experiencia de desarrollo: con autocompletado, refactorización segura y documentación en el IDE.
+    Escalabilidad: el uso de interfaces y tipos facilita el crecimiento del proyecto con mayor confianza y menos errores.
+
+
 ## Instalación
 
 Clona el repositorio y navega al directorio del proyecto:
