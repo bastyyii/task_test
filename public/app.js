@@ -12,15 +12,21 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     tasks.forEach(task => {
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <strong>${escapeHtml(task.title)}</strong> - ${escapeHtml(task.description || '')} 
-        <em>[${task.status}]</em>
-        <button onclick="toggleStatus(${task.id}, '${task.status}')">Cambiar estado</button>
-        <button onclick="deleteTask(${task.id})">Eliminar</button>
-      `;
-      taskList.appendChild(li);
-    });
+  const li = document.createElement('li');
+  li.classList.add('task-item');
+  li.innerHTML = `
+    <div class="task-info">
+      <strong class="task-title">${escapeHtml(task.title)}</strong>
+      <p class="task-desc">${escapeHtml(task.description || '')}</p>
+    </div>
+    <div class="task-meta">
+      <em class="task-status">[${task.status}]</em>
+      <button class="btn btn-toggle" onclick="toggleStatus(${task.id}, '${task.status}')">Cambiar estado</button>
+      <button class="btn btn-delete" onclick="deleteTask(${task.id})">Eliminar</button>
+    </div>
+  `;
+  taskList.appendChild(li);
+});
   }
 
   function escapeHtml(text) {

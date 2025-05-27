@@ -16,10 +16,6 @@ export const validateDataBody= async (req: Request, res: Response, next: NextFun
         .isString().withMessage('The title must be a string')
         .isLength({ max: 100 }).withMessage('The title cannot exceed 100 characters.')
         .run(req)
-    await body('description')
-        .isString().withMessage('The description must be a string')
-        .isLength({ max: 500 }).withMessage('The description cannot exceed 500 characters.')
-        .run(req)
     handleInputErrors(req, res, next);
 };
 

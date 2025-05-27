@@ -79,6 +79,9 @@ Eventos que el servidor emite a todos los clientes conectados:
 - `taskDeleted`: cuando se elimina una tarea
 - `tasksUpdated`: envía la lista completa actualizada
 
+## Para ejecutar test
+npm test
+
 ## .gitignore
 
 Incluye este archivo para evitar subir archivos innecesarios al repositorio:
