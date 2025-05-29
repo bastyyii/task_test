@@ -1,102 +1,106 @@
-# To-Do List en Tiempo Real
+# Real-Time To-Do List
 
-Proyecto simple de lista de tareas pendientes en tiempo real usando Node.js, Express, TypeScript, SQLite y WebSockets (Socket.IO).
+A simple real-time to-do list project built with Node.js, Express, TypeScript, SQLite, and WebSockets (Socket.IO).
 
-Tecnologías utilizadas: Node.js, Express, TypeScript, SQLite, Socket.IO, HTML y JavaScript (frontend básico).
+**Tech Stack:** Node.js, Express, TypeScript, SQLite, Socket.IO, HTML, and basic JavaScript (frontend).
 
-## Descripción del diseño
--Opté por la estructura MVC porque, aunque el proyecto es pequeño, esta organización facilita la 
-    escalabilidad, mantenibilidad y separación de responsabilidades. Si el proyecto creciera en complejidad, esta base permitiría integraciones más avanzadas sin necesidad de una reestructuración profunda.
--Además, la validación de datos como el title y el id se realiza mediante middlewares personalizados. Esta decisión 
-    se tomó para centralizar la lógica de validación, mejorar la reutilización del código y facilitar la extensión futura (por ejemplo, agregar validaciones para otros campos, autenticación, etc.).
+## Design Overview
 
--También se eligió usar TypeScript en lugar de JavaScript por varias razones:
-    Tipado estático: ayuda a detectar errores en tiempo de desarrollo, mejorando la fiabilidad del código.
-    Mejor experiencia de desarrollo: con autocompletado, refactorización segura y documentación en el IDE.
-    Escalabilidad: el uso de interfaces y tipos facilita el crecimiento del proyecto con mayor confianza y menos errores.
+- This project uses the **MVC (Model-View-Controller)** architecture. While the project is relatively small, this structure promotes scalability, maintainability, and a clear separation of concerns. If the application grows in complexity, this architecture allows for smoother integration of advanced features without requiring a major refactor.
+  
+- **Custom middleware** is used to validate data such as `title` and `id`. This centralizes validation logic, improves code reusability, and makes it easier to extend the validation (e.g., adding checks for other fields or authentication).
 
+- **TypeScript** was chosen over JavaScript for several reasons:
+  - **Static typing** helps catch errors during development, improving code reliability.
+  - **Enhanced developer experience** with autocomplete, safe refactoring, and inline documentation in IDEs.
+  - **Scalability**: Interfaces and types make it easier to grow the codebase with confidence and fewer bugs.
 
-## Instalación
+## Installation
 
-Clona el repositorio y navega al directorio del proyecto:
+Clone the repository and navigate to the project directory:
 
 ```bash
-git clone <URL_DEL_REPOSITORIO>
-cd <nombre-del-proyecto>
+git clone <REPOSITORY_URL>
+cd <project-name>
 ```
 
-Instala las dependencias:
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-Ejecuta el servidor en modo desarrollo:
+Run the development server:
 
 ```bash
 npm run dev
 ```
 
-La aplicación correrá en: http://localhost:3000
+The app will be running at: [http://localhost:3000](http://localhost:3000)
 
-## Endpoints de la API
+## API Endpoints
 
-GET `/tasks`: Obtener todas las tareas  
-POST `/tasks`: Crear una nueva tarea  
-Body (JSON):  
-```json
-{ "title": "string", "description": "string" }
-```
+- `GET /tasks`: Retrieve all tasks  
+- `POST /tasks`: Create a new task  
+  **Body (JSON):**
+  ```json
+  { "title": "string", "description": "string" }
+  ```
 
-PUT `/tasks/:id`: Cambiar el estado de una tarea  
-Body (JSON):  
-```json
-{ "status": "pending" | "completed" }
-```
+- `PUT /tasks/:id`: Update task status  
+  **Body (JSON):**
+  ```json
+  { "status": "pending" | "completed" }
+  ```
 
-DELETE `/tasks/:id`: Eliminar una tarea
+- `DELETE /tasks/:id`: Delete a task
 
-## Cómo probar la aplicación
+## How to Test the Application
 
-Desde Postman o Thunder Client(Para una mejor visualización de errores del backend, ya que el frontend tambien incluye comprobaciones):
+### Using Postman or Thunder Client  
+(Recommended for better backend error handling and debugging. The frontend also includes basic validations.)
 
-GET `http://localhost:3000/tasks` → lista de tareas  
-POST `http://localhost:3000/tasks` con body JSON:  
-```json
-{ "title": "Mi tarea nueva", "description": "Descripción opcional" }
-```
+- `GET http://localhost:3000/tasks` → list all tasks  
+- `POST http://localhost:3000/tasks` with JSON body:
+  ```json
+  { "title": "My new task", "description": "Optional description" }
+  ```
 
-PUT `http://localhost:3000/tasks/1` con body JSON:  
-```json
-{ "status": "completed" }
-```
+- `PUT http://localhost:3000/tasks/1` with JSON body:
+  ```json
+  { "status": "completed" }
+  ```
 
-DELETE `http://localhost:3000/tasks/1` para eliminar una tarea
+- `DELETE http://localhost:3000/tasks/1` to delete a task
 
-Desde el frontend:
+### Using the FRONTEND
 
-1. Abre el navegador en `http://localhost:3000`
-2. Llena el formulario con título y descripción
-3. Haz clic en “Agregar”
-4. La lista se actualizará automáticamente
-5. Puedes cambiar el estado o eliminar tareas con los botones correspondientes
+1. Open your browser at `http://localhost:3000`
+2. Fill in the form with a title and optional description
+3. Click "Add"
+4. The list will update automatically
+5. You can toggle the status or delete tasks using the corresponding buttons
 
-Todo esto ocurre en tiempo real gracias a WebSockets.
+All of this happens in real time thanks to WebSockets.
 
 ## WebSockets
 
-Eventos que el servidor emite a todos los clientes conectados:
-- `newTask`: cuando se crea una nueva tarea
-- `taskUpdated`: cuando se actualiza el estado de una tarea
-- `taskDeleted`: cuando se elimina una tarea
-- `tasksUpdated`: envía la lista completa actualizada
+Events emitted by the server to all connected clients:
 
-## Para ejecutar test
+- `newTask`: when a new task is created
+- `taskUpdated`: when a task's status is updated
+- `taskDeleted`: when a task is deleted
+- `tasksUpdated`: sends the full updated task list
+
+## Running Tests
+
+```bash
 npm test
+```
 
 ## .gitignore
 
-Incluye este archivo para evitar subir archivos innecesarios al repositorio:
+Make sure to include a `.gitignore` file to avoid pushing unnecessary files to the repository:
 
 ```
 node_modules/
@@ -109,9 +113,8 @@ npm-debug.log*
 *.sqlite3
 ```
 
-## Autor
+## Author
 
-Bastián Valdivia
-Linkedin: https://www.linkedin.com/in/bastian-valdivia-b61b75236/
-correo: bastivaldi15@gmail.com
-
+**Bastián Valdivia**  
+[LinkedIn](https://www.linkedin.com/in/bastian-valdivia-b61b75236/)  
+Email: bastivaldi15@gmail.com
