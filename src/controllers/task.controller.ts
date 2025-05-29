@@ -1,19 +1,9 @@
 import { Request, Response } from 'express';
-import db from '../services/db';
-
-import { Task } from '../models/task.model';
+import { createTaskInDb, deleteTaskInDb, getAllTasks, updateTaskStatusInDb } from '../services/taskRepository';
 
 export const getTasks = (_: Request, res: Response) => {
   try {
-    const tasks = db
-      .prepare(`
-        SELECT * 
-        FROM tasks 
-        ORDER BY 
-          COALESCE(updateDate, creationDate) DESC
-      `)
-      .all() as Task[];
-      
+    const tasks = getAllTasks();
     res.status(200).json(tasks);
   } catch (error) {
     res.status(500).json({ error: 'Server error retrieving tasks' });
@@ -23,28 +13,9 @@ export const getTasks = (_: Request, res: Response) => {
 export const createTask = (req: Request, res: Response) => {
   try {
     const { title, description } = req.body;
-
-    const insert = db.prepare(`
-      INSERT INTO tasks (title, description)
-      VALUES (?, ?)
-    `);
-    const result = insert.run(title, description || null);
-
-    const newTask = db
-      .prepare(`
-        SELECT 
-          id, 
-          title, 
-          description, 
-          status, 
-          creationDate, 
-          updateDate
-        FROM tasks
-        WHERE id = ?
-      `)
-      .get(result.lastInsertRowid) as Task;
-
+    const newTask = createTaskInDb(title, description);
     res.status(201).json(newTask);
+
   } catch (error) {
     console.error('Error creating task:', error);
     res.status(500).json({ error: 'Server error creating task' });
@@ -55,35 +26,16 @@ export const updateTaskStatus = (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
+
     if (status !== 'pending' && status !== 'completed') {
-      res.status(400).json({ error: 'Invalid status. Must be "pending" or "compled".' });
-      return
+      return res.status(400).json({ error: 'Invalid status. Must be "pending" or "completed".' });
     }
 
-    const result = db.prepare(`
-      UPDATE tasks
-      SET status = ?, updateDate = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `).run(status, id);
+    const updatedTask = updateTaskStatusInDb(id, status);
 
-    if (result.changes === 0) {
-      res.status(404).json({ error: 'Task not found' });
-      return
+    if (!updatedTask) {
+      return res.status(404).json({ error: 'Task not found' });
     }
-
-    const updatedTask = db
-      .prepare(`
-        SELECT 
-          id, 
-          title, 
-          description, 
-          status, 
-          creationDate, 
-          updateDate
-        FROM tasks
-        WHERE id = ?
-      `)
-      .get(id) as Task;
 
     res.status(200).json(updatedTask);
   } catch (error) {
@@ -94,12 +46,10 @@ export const updateTaskStatus = (req: Request, res: Response) => {
 export const deleteTask = (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const deleted = deleteTaskInDb(id);
 
-    const result = db.prepare('DELETE FROM tasks WHERE id = ?').run(id);
-
-    if (result.changes === 0) {
-      res.status(404).json({ error: 'Task not found' });
-      return
+    if (!deleted) {
+      return res.status(404).json({ error: 'Task not found' });
     }
 
     res.status(204).send();

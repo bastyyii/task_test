@@ -3,6 +3,8 @@ import { createTask, deleteTask, getTasks, updateTaskStatus } from '../controlle
 import { Task } from '../models/task.model';
 import db from '../services/db';
 import { Statement } from 'better-sqlite3';
+import { getAllTasks, createTaskInDb, updateTaskStatusInDb, deleteTaskInDb } from '../services/taskRepository';
+jest.mock('../services/taskRepository'); 
 
 describe('getTasks', () => {
   beforeEach(() => {
@@ -12,16 +14,11 @@ describe('getTasks', () => {
   it('should return a list of tasks with status 200', () => {
     const fakeTasks: Task[] = [
       {
-        id: 1,
         title: 'Tarea 1',
-        description: 'Descripción',
+        description: 'Descripción'
       },
     ];
-
-    const mockAll = jest.fn().mockReturnValue(fakeTasks);
-    jest.spyOn(db, 'prepare').mockImplementation(() => ({
-      all: mockAll,
-    }) as unknown as Statement);
+    (getAllTasks as jest.Mock).mockReturnValue(fakeTasks);
 
     const req = createRequest();
     const res = createResponse();
@@ -30,17 +27,13 @@ describe('getTasks', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res._getJSONData()).toEqual(fakeTasks);
-    expect(db.prepare).toHaveBeenCalledWith(expect.stringContaining('SELECT *'));
+    expect(getAllTasks).toHaveBeenCalled();
   });
 
-  it('should return 500 if database throws an error', () => {
-    const mockAll = jest.fn(() => {
+  it('should return 500 if repository throws an error', () => {
+    (getAllTasks as jest.Mock).mockImplementation(() => {
       throw new Error('DB error');
     });
-
-    jest.spyOn(db, 'prepare').mockImplementation(() => ({
-      all: mockAll,
-    }) as unknown as Statement);
 
     const req = createRequest();
     const res = createResponse();
@@ -55,25 +48,17 @@ describe('getTasks', () => {
 describe('createTask', () => {
   afterEach(() => {
     jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should create a new task and respond with 201 and the new task', () => {
     const fakeTask: Task = {
       id: 1,
       title: 'Test Task',
-      description: 'Description',
+      description: 'Description'
     };
 
-    const mockRun = jest.fn().mockReturnValue({ lastInsertRowid: 1 });
-    const mockGet = jest.fn().mockReturnValue(fakeTask);
-
-    const prepareSpy = jest.spyOn(db, 'prepare')
-      .mockImplementationOnce(() => ({
-        run: mockRun,
-      }) as unknown as Statement)
-      .mockImplementationOnce(() => ({
-        get: mockGet,
-      }) as unknown as Statement);
+    (createTaskInDb as jest.Mock).mockReturnValue(fakeTask);
 
     const req = createRequest({
       body: {
@@ -85,21 +70,15 @@ describe('createTask', () => {
 
     createTask(req, res);
 
-    expect(prepareSpy).toHaveBeenCalled();
-    expect(mockRun).toHaveBeenCalledWith('Test Task', 'Description');
-    expect(mockGet).toHaveBeenCalledWith(1);
+    expect(createTaskInDb).toHaveBeenCalledWith('Test Task', 'Description');
     expect(res.statusCode).toBe(201);
     expect(res._getJSONData()).toEqual(fakeTask);
   });
 
   it('should return 500 if there is a database error', () => {
-    const mockRun = jest.fn(() => {
+    (createTaskInDb as jest.Mock).mockImplementation(() => {
       throw new Error('DB Insert error');
     });
-
-    jest.spyOn(db, 'prepare').mockImplementation(() => ({
-      run: mockRun,
-    }) as unknown as Statement);
 
     const req = createRequest({
       body: {
@@ -116,10 +95,10 @@ describe('createTask', () => {
   });
 });
 
-
 describe('updateTaskStatus', () => {
   afterEach(() => {
     jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should update task status and return updated task with status 200', () => {
@@ -132,16 +111,7 @@ describe('updateTaskStatus', () => {
       updateDate: new Date().toISOString(),
     };
 
-    const mockRun = jest.fn().mockReturnValue({ changes: 1 });
-    const mockGet = jest.fn().mockReturnValue(fakeTask);
-
-    const prepareSpy = jest.spyOn(db, 'prepare')
-      .mockImplementationOnce(() => ({
-        run: mockRun,
-      }) as unknown as Statement)
-      .mockImplementationOnce(() => ({
-        get: mockGet,
-      }) as unknown as Statement);
+    (updateTaskStatusInDb as jest.Mock).mockReturnValue(fakeTask);
 
     const req = createRequest({
       params: { id: '1' },
@@ -151,9 +121,7 @@ describe('updateTaskStatus', () => {
 
     updateTaskStatus(req, res);
 
-    expect(prepareSpy).toHaveBeenCalledTimes(2);
-    expect(mockRun).toHaveBeenCalledWith('completed', '1');
-    expect(mockGet).toHaveBeenCalledWith('1');
+    expect(updateTaskStatusInDb).toHaveBeenCalledWith('1', 'completed');
     expect(res.statusCode).toBe(200);
     expect(res._getJSONData()).toEqual(fakeTask);
   });
@@ -168,16 +136,11 @@ describe('updateTaskStatus', () => {
     updateTaskStatus(req, res);
 
     expect(res.statusCode).toBe(400);
-    expect(res._getJSONData()).toEqual({ error: 'Invalid status. Must be "pending" or "compled".' });
+    expect(res._getJSONData()).toEqual({ error: 'Invalid status. Must be "pending" or "completed".' });
   });
 
   it('should return 404 if no task was updated', () => {
-    const mockRun = jest.fn().mockReturnValue({ changes: 0 });
-
-    jest.spyOn(db, 'prepare')
-      .mockImplementationOnce(() => ({
-        run: mockRun,
-      }) as unknown as Statement);
+    (updateTaskStatusInDb as jest.Mock).mockReturnValue(null);
 
     const req = createRequest({
       params: { id: '99' },
@@ -187,20 +150,15 @@ describe('updateTaskStatus', () => {
 
     updateTaskStatus(req, res);
 
-    expect(mockRun).toHaveBeenCalledWith('pending', '99');
+    expect(updateTaskStatusInDb).toHaveBeenCalledWith('99', 'pending');
     expect(res.statusCode).toBe(404);
     expect(res._getJSONData()).toEqual({ error: 'Task not found' });
   });
 
   it('should return 500 if there is a database error', () => {
-    const mockRun = jest.fn(() => {
+    (updateTaskStatusInDb as jest.Mock).mockImplementation(() => {
       throw new Error('DB error');
     });
-
-    jest.spyOn(db, 'prepare')
-      .mockImplementationOnce(() => ({
-        run: mockRun,
-      }) as unknown as Statement);
 
     const req = createRequest({
       params: { id: '1' },
@@ -218,14 +176,11 @@ describe('updateTaskStatus', () => {
 describe('deleteTask', () => {
   afterEach(() => {
     jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should delete task and return 204 status', () => {
-    const mockRun = jest.fn().mockReturnValue({ changes: 1 });
-
-    jest.spyOn(db, 'prepare').mockImplementation(() => ({
-      run: mockRun,
-    }) as unknown as Statement);
+    (deleteTaskInDb as jest.Mock).mockReturnValue(true);
 
     const req = createRequest({
       params: { id: '1' },
@@ -234,17 +189,13 @@ describe('deleteTask', () => {
 
     deleteTask(req, res);
 
-    expect(mockRun).toHaveBeenCalledWith('1');
+    expect(deleteTaskInDb).toHaveBeenCalledWith('1');
     expect(res.statusCode).toBe(204);
-    expect(res._isEndCalled()).toBe(true); 
+    expect(res._isEndCalled()).toBe(true);
   });
 
   it('should return 404 if task not found', () => {
-    const mockRun = jest.fn().mockReturnValue({ changes: 0 });
-
-    jest.spyOn(db, 'prepare').mockImplementation(() => ({
-      run: mockRun,
-    }) as unknown as Statement);
+    (deleteTaskInDb as jest.Mock).mockReturnValue(false);
 
     const req = createRequest({
       params: { id: '99' },
@@ -253,19 +204,15 @@ describe('deleteTask', () => {
 
     deleteTask(req, res);
 
-    expect(mockRun).toHaveBeenCalledWith('99');
+    expect(deleteTaskInDb).toHaveBeenCalledWith('99');
     expect(res.statusCode).toBe(404);
     expect(res._getJSONData()).toEqual({ error: 'Task not found' });
   });
 
   it('should return 500 if database throws error', () => {
-    const mockRun = jest.fn(() => {
+    (deleteTaskInDb as jest.Mock).mockImplementation(() => {
       throw new Error('DB error');
     });
-
-    jest.spyOn(db, 'prepare').mockImplementation(() => ({
-      run: mockRun,
-    }) as unknown as Statement);
 
     const req = createRequest({
       params: { id: '1' },
